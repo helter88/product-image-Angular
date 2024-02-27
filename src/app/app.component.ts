@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { DomSanitizer } from '@angular/platform-browser';
 import { FileHandler } from './app.model';
 import { processSelectedFileList } from './util';
+import { ProductService } from './product.service';
 
 @Component({
   selector: 'app-root',
@@ -18,18 +19,30 @@ export class AppComponent {
 
   constructor(
     private formBuilder: FormBuilder,
-    private sanitazier: DomSanitizer
+    private sanitazier: DomSanitizer,
+    private productService: ProductService
   ){}
   
   ngOnInit() {
     this.productForm = this.formBuilder.group({
-      productName: ['', Validators.required],
-      productPrice: ['', Validators.required],
-      productDescription: ['', Validators.required],
+      name: ['', Validators.required],
+      price: ['', Validators.required],
+      description: ['', Validators.required],
     });
   }
 
-  onSubmit(){}
+  onSubmit(){
+    if (this.productForm.valid) {
+      const formData = new FormData();
+      formData.append('productData', JSON.stringify(this.productForm.value));
+      if(this.selectedFiles.length){
+        this.selectedFiles.forEach((fileHandler, index) => {
+          formData.append(`image${index}`, fileHandler.file);
+        });
+      }
+      this.productService.addProduct(formData).subscribe();
+    }
+  }
 
   onFileSelect(event: Event) {
     const input = event.target as HTMLInputElement;
