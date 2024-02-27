@@ -27,13 +27,15 @@
 
   <div>
     <input type="file" #fileInput id="file" (change)="onFileSelect($event)" multiple [accept]="'.jpg,.png,.jpeg'" hidden>
-    <button mat-stroked-button color="primary" (click)="fileInput.click()">Wgraj Zdjęcia</button>
+    <div class="drag-drop-box" appDrag (files) = "onDropped($event)">
+       <span class="text-box">Drag and drop your files or <a (click)="fileInput.click()">select</a> files</span>
+    </div>
   </div>
   <div class="thumbnails">
     <div *ngFor="let fileHandler of selectedFiles; let i = index" class="thumbnail">
       <img [src]="fileHandler?.url" alt="miniaturka">
       <div class="thumbnail-details">
-        <span>{{ fileHandler.file }}</span>
+        <span>{{ fileHandler.file.name }}</span>
         <button mat-mini-fab color="warn" class="remove-button" (click)="removeFile(i)">
           <mat-icon>close</mat-icon>
         </button>

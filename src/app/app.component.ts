@@ -2,6 +2,7 @@ import { Component, ElementRef, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { DomSanitizer } from '@angular/platform-browser';
 import { FileHandler } from './app.model';
+import { processSelectedFileList } from './util';
 
 @Component({
   selector: 'app-root',
@@ -25,7 +26,6 @@ export class AppComponent {
       productName: ['', Validators.required],
       productPrice: ['', Validators.required],
       productDescription: ['', Validators.required],
-      productImages: ['', Validators.required] 
     });
   }
 
@@ -33,33 +33,9 @@ export class AppComponent {
 
   onFileSelect(event: Event) {
     const input = event.target as HTMLInputElement;
-    if (!input.files || input.files.length === 0) {
-      return;
-    }
-  
-    // Pętla przez wszystkie nowo wybrane pliki
-    for (let i = 0; i < input.files.length; i++) {
-      if (this.selectedFiles.length >= 4) {
-        // Przekroczenie limitu plików
-        alert("Można przesłać maksymalnie 4 zdjęcia.");
-        break;
-      }
-  
-      const file = input.files[i];
-  
-      // Sprawdź typ pliku (opcjonalnie można dodać dodatkowe walidacje, np. rozmiar pliku)
-      if (file.type.match(/image\/*/) && !this.selectedFiles.some(f => f.file.name === file.name)) {
-        const fileHandler: FileHandler = {
-          file: file,
-          url: this.sanitazier.bypassSecurityTrustUrl(
-            URL.createObjectURL(file)
-          )
-        }
-        this.selectedFiles.push(fileHandler);
-     
-      } else {
-        alert("Dozwolone są tylko pliki obrazów.");
-      }
+    const fileList = input.files;
+    if(fileList){
+      this.selectedFiles = processSelectedFileList(fileList, this.selectedFiles, this.sanitazier);
     }
   }
 
@@ -70,5 +46,8 @@ export class AppComponent {
   removeFile(index: number): void {
     this.selectedFiles.splice(index, 1);
   }
-}
 
+  onDropped(event: FileList) {
+    this.selectedFiles = processSelectedFileList(event, this.selectedFiles, this.sanitazier);
+  }
+}

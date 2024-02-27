@@ -8,10 +8,12 @@ import {MatInputModule} from '@angular/material/input';
 import { ReactiveFormsModule } from '@angular/forms';
 import {MatButtonModule} from '@angular/material/button';
 import {MatIconModule} from '@angular/material/icon';
+import { DragDirective } from './drag.directive';
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
+    DragDirective
   ],
   imports: [
     BrowserModule,
