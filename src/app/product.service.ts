@@ -11,6 +11,6 @@ export class ProductService {
   ) { }
 
   addProduct(data: FormData) {
-    return this.http.post('MY_BACKEND_URL', data);
+    return this.http.post('api/products', data);
   }
 }
