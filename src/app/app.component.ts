@@ -1,9 +1,9 @@
 import { Component, ElementRef, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { DomSanitizer } from '@angular/platform-browser';
-import { FileHandler } from './app.model';
-import { processSelectedFileList } from './util';
+import { FileHandler, ImageDto } from './app.model';
 import { ProductService } from './product.service';
+import { base64ToBlob, processSelectedFileList } from './util';
 
 @Component({
   selector: 'app-root',
@@ -24,6 +24,16 @@ export class AppComponent {
   ){}
   
   ngOnInit() {
+    this.productService.getProduct(1).subscribe( product => {
+      this.productForm.patchValue(product);
+      product.images.forEach(img => {
+        const file = this.createFileFromImage(img);
+        this.selectedFiles.push({
+          file,
+          url: this.sanitazier.bypassSecurityTrustUrl(URL.createObjectURL(file))
+        })
+       })
+    });
     this.productForm = this.formBuilder.group({
       name: ['', Validators.required],
       price: ['', Validators.required],
@@ -36,8 +46,8 @@ export class AppComponent {
       const formData = new FormData();
       formData.append('productData', JSON.stringify(this.productForm.value));
       if(this.selectedFiles.length){
-        this.selectedFiles.forEach((fileHandler, index) => {
-          formData.append(`image${index}`, fileHandler.file);
+        this.selectedFiles.forEach((fileHandler) => {
+          formData.append(`images`, fileHandler.file);
         });
       }
       this.productService.addProduct(formData).subscribe();
@@ -62,5 +72,10 @@ export class AppComponent {
 
   onDropped(event: FileList) {
     this.selectedFiles = processSelectedFileList(event, this.selectedFiles, this.sanitazier);
+  }
+
+  private createFileFromImage(image: ImageDto): File {
+    const blob = base64ToBlob(image.base64, image.filetype);
+    return new File([blob], image.filename, { type: image.filetype });
   }
 }
